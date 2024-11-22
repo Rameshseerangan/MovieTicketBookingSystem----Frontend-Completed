@@ -35,13 +35,5 @@ Welcome to the **Movie Booking App Frontend**, the user interface for a seamless
 
 ---
 
-## Installation and Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/movie-booking-app-frontend.git
-   cd movie-booking-app-frontend
-
-
 [View Documentation](https://drive.google.com/file/d/1_BkqaCkMbICZ36SezS1wO2ENyuMTOcNz/view?usp=sharing)
 
