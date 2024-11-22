@@ -38,7 +38,7 @@ const TheaterManagement = () => {
     try {
       const token = localStorage.getItem("authToken");
       const res = await axios.post(
-        "https://https://movieticketbookingsystem-backend.onrender.com/api/auth/createtheater",
+        "https://movieticketbookingsystem-backend.onrender.com/api/auth/createtheater",
         createData,
         {
           headers: {
@@ -58,7 +58,7 @@ const TheaterManagement = () => {
     try {
       const token = localStorage.getItem("authToken");
       const res = await axios.put(
-        "https://https://movieticketbookingsystem-backend.onrender.com/api/auth/updatetheater",
+        "https://movieticketbookingsystem-backend.onrender.com/api/auth/updatetheater",
         updateData,
         {
           headers: {
