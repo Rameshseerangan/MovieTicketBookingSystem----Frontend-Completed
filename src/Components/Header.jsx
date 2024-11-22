@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Header = ({ setSearchQuery }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   const handleSearch = () => {
     setSearchQuery(query);
@@ -12,7 +12,7 @@ const Header = ({ setSearchQuery }) => {
     <header className="flex justify-between items-center p-4 bg-gray-900 text-white shadow-lg">
       {/* Movie Explorer Logo */}
       <h1 className="text-3xl font-bold text-red-500">Movie Explorer</h1>
-      
+
       {/* Search Bar */}
       <div className="flex items-center space-x-4">
         <input

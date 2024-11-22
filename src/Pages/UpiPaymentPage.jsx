@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const UpiPayment = () => {
-  const [upiId, setUpiId] = useState('');
+  const [upiId, setUpiId] = useState("");
 
   return (
     <div className="mb-4">

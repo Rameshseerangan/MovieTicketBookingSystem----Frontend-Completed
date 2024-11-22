@@ -1,6 +1,6 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { getMovieDetails } from '../Api/apiService';
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getMovieDetails } from "../Api/apiService";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -16,7 +16,7 @@ const MovieDetails = () => {
   }, [id]);
 
   const handleBooking = () => {
-    // Navigate to the payment page with the current movie ID
+    // Navigate to the payment page 
     navigate(`/movie/${id}/seat`);
   };
 
@@ -32,7 +32,7 @@ const MovieDetails = () => {
           <p>Genre: {movie.Genre}</p>
           <p>Year: {movie.Year}</p>
           <p>Cast: {movie.Actors}</p>
-          
+
           <div>
             <button
               onClick={handleBooking}
@@ -41,7 +41,6 @@ const MovieDetails = () => {
               Book Now
             </button>
           </div>
-          
         </div>
       </div>
     </div>

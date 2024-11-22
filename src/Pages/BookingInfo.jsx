@@ -1,37 +1,43 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
 const BookingInfo = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [bookings, setBookings] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const fetchBookings = async () => {
     if (!email) {
-      setError('Please enter an email.');
+      setError("Please enter an email.");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     try {
-      const response = await axios.get(`http://localhost:5000/api/auth/history/${email}`);
+      const response = await axios.get(
+        `https://movieticketbookingsystem-backend.onrender.com/api/auth/history/${email}`
+      );
       setBookings(response.data.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error fetching bookings.');
+      setError(err.response?.data?.message || "Error fetching bookings.");
     }
     setLoading(false);
   };
 
   const cancelBooking = async (bookingId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/auth/bookings/${email}/${bookingId}`);
+      await axios.delete(
+        `https://movieticketbookingsystem-backend.onrender.com/api/auth/bookings/${email}/${bookingId}`
+      );
       // Remove the canceled booking from the state
       setBookings(bookings.filter((booking) => booking._id !== bookingId));
-      alert('Booking canceled successfully. Your money will be refunded within 24 hours.');
+      alert(
+        "Booking canceled successfully. Your money will be refunded within 24 hours."
+      );
     } catch (err) {
-      alert(err.response?.data?.message || 'Error canceling booking.');
+      alert(err.response?.data?.message || "Error canceling booking.");
     }
   };
 
@@ -59,10 +65,18 @@ const BookingInfo = () => {
           <ul>
             {bookings.map((booking) => (
               <li key={booking._id} className="border-b py-2">
-                <p><strong>Movie:</strong> {booking.ticketInfo.movieName}</p>
-                <p><strong>Seats:</strong> {booking.ticketInfo.seats.join(', ')}</p>
-                <p><strong>Date:</strong> {booking.ticketInfo.date}</p>
-                <p><strong>Time:</strong> {booking.ticketInfo.time}</p>
+                <p>
+                  <strong>Movie:</strong> {booking.ticketInfo.movieName}
+                </p>
+                <p>
+                  <strong>Seats:</strong> {booking.ticketInfo.seats.join(", ")}
+                </p>
+                <p>
+                  <strong>Date:</strong> {booking.ticketInfo.date}
+                </p>
+                <p>
+                  <strong>Time:</strong> {booking.ticketInfo.time}
+                </p>
                 <button
                   onClick={() => cancelBooking(booking._id)}
                   className="mt-2 p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"

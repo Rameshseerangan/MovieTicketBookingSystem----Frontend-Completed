@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getMovieDetails } from "../Api/apiService";
+import axios from "axios";
 
 const SeatSelection = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [movie, setMovie] = useState(null);
+  const [theaters, setTheaters] = useState([]); // Store theater data
   const [selectedTheater, setSelectedTheater] = useState("");
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
@@ -14,24 +15,39 @@ const SeatSelection = () => {
     Array(5)
       .fill()
       .map(() => Array(8).fill(0))
-  ); // 0 = available, 1 = reserved, 2 = selected, 3 = unavailable
-  const seatPrice = 190; // Seat price per seat
+  ); // Seat availability (0 = available, 1 = reserved, 2 = selected, 3 = unavailable)
+  const [seatPrice, setSeatPrice] = useState(190); // Default seat price
+
+  const [loading, setLoading] = useState(true); // Loading state for fetching movie data
 
   useEffect(() => {
-    const fetchDetails = async () => {
-      const details = await getMovieDetails(id);
-      setMovie(details);
+    const fetchTheaterData = async () => {
+      try {
+        const res = await axios.get(
+          "https://movieticketbookingsystem-backend.onrender.com/api/auth/gettheater"
+        );
+        setTheaters(res.data); // Set theater data from backend
+      } catch (error) {
+        console.error("Error fetching theater data:", error);
+      }
     };
-    fetchDetails();
-  }, [id]);
 
-  const theaterShowtimes = {
-    AGS: ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM"],
-    INOX: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM"],
-    PVR: ["9:00 AM", "12:00 PM", "3:00 PM", "6:00 PM"],
-    Movix: ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM"],
-    Movieexpress: ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM"],
-  };
+    const fetchMovieDetails = async () => {
+      try {
+        const res = await axios.get(
+          `https://movieticketbookingsystem-backend.onrender.com/api/auth/movie/${id}`
+        );
+        setMovie(res.data); // Set movie data from backend
+        setLoading(false); // Stop loading once movie data is fetched
+      } catch (error) {
+        console.error("Error fetching movie details:", error);
+        setLoading(false); // Stop loading even if there is an error
+      }
+    };
+
+    fetchTheaterData();
+    fetchMovieDetails();
+  }, [id]);
 
   const toggleSeatSelection = (rowIndex, seatIndex) => {
     setSeats((prevSeats) =>
@@ -54,38 +70,45 @@ const SeatSelection = () => {
         )
       )
       .filter((seat) => seat !== null);
-  
+
     if (selectedSeats.length === 0) {
       alert("Please select at least one seat to book.");
       return;
     }
-  
+
     const totalPrice = selectedSeats.length * seatPrice;
-  
+
     const bookingDetails = {
       movie: movie ? movie.Title : "Unknown Movie",
       theater: selectedTheater,
       showTime: selectedTimeSlot,
       date: selectedDate,
       seats: selectedSeats,
-      totalPrice: totalPrice,  // Make sure totalPrice is stored here
+      totalPrice: totalPrice,
     };
-  
+
     localStorage.setItem("bookingDetails", JSON.stringify(bookingDetails));
-  
+
     navigate(`/movie/${id}/payment`);
   };
-  
 
   const handleTheaterChange = (e) => {
-    setSelectedTheater(e.target.value);
-    setSelectedTimeSlot("");
+    const selected = theaters.find(
+      (theater) => theater.name === e.target.value
+    );
+    setSelectedTheater(selected.name);
+    setSelectedTimeSlot(""); // Reset the time slot when theater changes
+    setSeatPrice(selected.price); // Update the seat price based on the selected theater
   };
 
   const calculateTotalPrice = () => {
     const selectedSeatsCount = seats.flat().filter((seat) => seat === 2).length;
     return selectedSeatsCount * seatPrice;
   };
+
+  if (loading) {
+    return <div>Loading movie details...</div>; // Loading message
+  }
 
   return (
     <div className="p-6 bg-gray-800 text-white min-h-screen">
@@ -104,9 +127,9 @@ const SeatSelection = () => {
               className="p-2 bg-gray-700 text-white rounded w-full"
             >
               <option value="">-- Select Theater --</option>
-              {Object.keys(theaterShowtimes).map((theater, index) => (
-                <option key={index} value={theater}>
-                  {theater}
+              {theaters.map((theater, index) => (
+                <option key={index} value={theater.name}>
+                  {theater.name} {/* Display theater name */}
                 </option>
               ))}
             </select>
@@ -122,11 +145,13 @@ const SeatSelection = () => {
             >
               <option value="">-- Select Time Slot --</option>
               {selectedTheater &&
-                theaterShowtimes[selectedTheater].map((slot, index) => (
-                  <option key={index} value={slot}>
-                    {slot}
-                  </option>
-                ))}
+                theaters
+                  .find((theater) => theater.name === selectedTheater)
+                  ?.showTimes.map((slot, index) => (
+                    <option key={index} value={slot}>
+                      {slot} {/* Display show time slots */}
+                    </option>
+                  ))}
             </select>
           </div>
 
@@ -137,12 +162,18 @@ const SeatSelection = () => {
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="p-2 bg-gray-700 text-white rounded w-full"
-              min={new Date().toISOString().split("T")[0]} // Disable past dates, starting from today
+              min={new Date().toISOString().split("T")[0]} // Disable past dates
             />
           </div>
 
+          {/* Display selected theater's price */}
           <div className="text-lg mt-4">
-            Total Price: ₹{calculateTotalPrice()}
+            {selectedTheater && <p>Seat Price : ₹{seatPrice}</p>}
+          </div>
+
+          <div className="text-lg mt-4">
+            Total Price: ₹{calculateTotalPrice()}{" "}
+            {/* Display the total price */}
           </div>
 
           <button
@@ -172,9 +203,18 @@ const SeatSelection = () => {
                       onClick={() => toggleSeatSelection(rowIndex, seatIndex)}
                       className={`w-12 h-12 ${seatClass} rounded`}
                       disabled={seat === 1 || seat === 3} // Disable reserved or unavailable seats
-                      aria-label={`Seat ${String.fromCharCode(65 + rowIndex)}${seatIndex + 1} (${seat === 0 ? "Available" : seat === 1 ? "Reserved" : "Selected"})`}
+                      aria-label={`Seat ${String.fromCharCode(65 + rowIndex)}${
+                        seatIndex + 1
+                      } (${
+                        seat === 0
+                          ? "Available"
+                          : seat === 1
+                          ? "Reserved"
+                          : "Selected"
+                      })`}
                     >
-                      {String.fromCharCode(65 + rowIndex)}{seatIndex + 1}
+                      {String.fromCharCode(65 + rowIndex)}
+                      {seatIndex + 1}
                     </button>
                   );
                 })}

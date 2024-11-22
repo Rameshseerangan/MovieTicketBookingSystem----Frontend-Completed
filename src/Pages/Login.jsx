@@ -3,32 +3,46 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // To handle redirecting after login
-  const [token, setToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // Added loading state
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoading(true); // Set loading state to true before making the request
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const res = await axios.post("https://movieticketbookingsystem-backend.onrender.com/api/auth/login", { email, password });
+
       if (res.data?.token) {
         console.log("Login Successful:", res.data);
-        setToken(res.data.token);
-        localStorage.setItem("authToken", res.data.token);
-        navigate("/admin");
+        const { token, role } = res.data;
+
+        // Save token and role in localStorage
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("userRole", role);
+
+        // Navigate based on role
+        if (role === "admin") {
+          navigate("/theatermanagement"); // Admin route
+        } else {
+          navigate("/"); // User route (Home page)
+        }
+
         toast.success(res.data.message);
       }
     } catch (error) {
       console.error("Login Error:", error);
       toast.error(error.response?.data?.message || "Login Failed");
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Set loading state back to false after request completion
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-800">
       <div className="bg-gray-400 shadow-lg rounded-lg p-8 max-w-md w-full space-y-6">
@@ -82,8 +96,9 @@ const Login = () => {
           <button
             type="submit"
             className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition ease-in-out duration-300"
+            disabled={isLoading} // Disable the button if loading
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 
