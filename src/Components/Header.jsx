@@ -1,11 +1,22 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const Header = ({ setSearchQuery }) => {
   const [query, setQuery] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSearch = () => {
-    setSearchQuery(query);
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem("authToken");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken"); // Clear token
+    localStorage.removeItem("userRole"); // Clear role if stored
+    setIsAuthenticated(false);
+    navigate("/"); // Redirect to login page
   };
 
   return (
@@ -24,7 +35,7 @@ const Header = ({ setSearchQuery }) => {
         />
         <button
           className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-          onClick={handleSearch}
+          onClick={() => setSearchQuery(query)}
         >
           Search
         </button>
@@ -32,19 +43,32 @@ const Header = ({ setSearchQuery }) => {
 
       {/* Auth Buttons */}
       <div className="flex items-center space-x-4">
-        <Link to="/login">
-          <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            Login
+        {isAuthenticated ? (
+          // Show Logout button if user is logged in
+          <button
+            onClick={handleLogout}
+            className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Logout
           </button>
-        </Link>
-        <Link to="/register">
-          <button className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-            Register
-          </button>
-        </Link>
+        ) : (
+          // Show Login & Register buttons if user is NOT logged in
+          <>
+            <Link to="/login">
+              <button className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Login
+              </button>
+            </Link>
+            <Link to="/register">
+              <button className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                Register
+              </button>
+            </Link>
+          </>
+        )}
 
         <Link to="/bookings">
-          <button className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+          <button className="p-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
             BookingInfo
           </button>
         </Link>
